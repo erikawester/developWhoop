@@ -1,9 +1,5 @@
-//considered using axios vs fetch
-//but with axios you can write less error handling,
-//I think it's less likely to run into errors and I think the code is cleaner
 const axios = require("axios");
 const crypto = require("crypto");
-
 const querystring = require("querystring");
 const {
   CLIENT_ID,
@@ -13,6 +9,10 @@ const {
   TOKEN_URL,
   SCOPES,
 } = require("../config");
+
+exports.welcome = (req, res) => {
+  res.send(`Welcome to Erika's Whoop Stats!`);
+};
 
 exports.authorize = (req, res) => {
   //generate 32-character hexadecimal string
@@ -28,14 +28,9 @@ exports.authorize = (req, res) => {
     state,
   };
 
-  const authorizationUrl = `${AUTHORIZATION_URL}?${querystring.stringify(
-    params
-  )}`;
-  res.redirect(authorizationUrl);
-};
+  const authorizationUrl = `${AUTHORIZATION_URL}?${querystring.stringify(params)}`;
 
-exports.welcome = (req, res) => {
-  res.send(`Welcome to Erika's Whoop Stats!`);
+  res.redirect(authorizationUrl);
 };
 
 //wait for the network request to complete
@@ -74,14 +69,16 @@ exports.callback = async (req, res) => {
     //include access token. Extract this token from response and send it back to client
     const accessToken = response.data.access_token;
     res.send(`Access token: ${accessToken}`);
+
   } catch (error) {
     //error handling
     console.error(
-      "Error exchanging authorization code for access token:",
+      "There's been an error with exchanging authorization code for access token:",
       error.response ? error.response.data : error.message
     );
     res
       .status(500)
       .send("Error exchanging authorization code for access token.");
-  }
+  };
+  
 };

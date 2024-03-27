@@ -10,10 +10,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-    secret: process.env.SESSION_SECRET, // Replace this with a real secret in production
+    secret: process.env.SESSION_SECRET, 
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: !process.env.DEVELOPMENT } // Secure cookies in production
+    cookie: { secure: !process.env.DEVELOPMENT } 
   }));
 
 //bring us to routes folder
