@@ -1,11 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { authorize, callback } = require('../controllers/authController');
+const { welcome, authorize, callback } = require('../controllers/whoopController');
 
-router.get('/', (req, res) => {
-  res.send('Welcome to the Whoop OAuth Demo!');
-});
-
+router.get('/', welcome); 
 router.get('/authorize', authorize);
 router.get('/callback', callback);
 
