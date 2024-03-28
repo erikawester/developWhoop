@@ -1,18 +1,17 @@
 <template>
     <div id="app">
       <Welcome/>
-      <!-- Any other components or content you want to include in your app -->
     </div>
   </template>
   
   <script>
-  import Welcome from './Welcome.vue'; // Adjust the path as necessary
+  import Welcome from './Welcome.vue'; 
   
   export default {
     components: {
       Welcome 
     }
-  }
+  };
   </script>
   
   <style>

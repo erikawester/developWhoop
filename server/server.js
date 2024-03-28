@@ -19,7 +19,6 @@ app.use(session({
 //bring us to routes folder
 app.use('/', routes); 
 
-
 // Global Error Handler
 app.use((err, req, res, next) => {
     const defaultErr = {
@@ -27,11 +26,21 @@ app.use((err, req, res, next) => {
       status: 500,
       message: { err: 'An error occurred', detail: err.message },
     };
+    //merge incoming error obj with default error obj
     const errorObj = Object.assign({}, defaultErr, err);
+    //for bugging purpose - log the stack trace
     console.log(errorObj.log);
     console.log(err.stack); 
+    //respond with error status and error message object
     return res.status(errorObj.status).json(errorObj.message);
   });
+
+//catch all
+app.use((req, res, next) => {
+    const error = new Error("Not Found");
+    error.status = 404;
+    return next(error);
+});
 
 
 app.listen(PORT, () => {

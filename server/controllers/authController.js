@@ -15,9 +15,8 @@ exports.welcome = (req, res) => {
 };
 
 exports.authorize = (req, res) => {
-  //generate 32-character hexadecimal string
   const state = crypto.randomBytes(16).toString("hex");
-  //storing state in the session
+  //store state in a session
   req.session.oauthState = state;
 
   const params = {
@@ -28,28 +27,33 @@ exports.authorize = (req, res) => {
     state,
   };
 
-  const authorizationUrl = `${AUTHORIZATION_URL}?${querystring.stringify(params)}`;
+  const authorizationUrl = `${AUTHORIZATION_URL}?${querystring.stringify(
+    params
+  )}`;
 
   res.redirect(authorizationUrl);
 };
 
-//wait for the network request to complete
-exports.callback = async (req, res) => {
+//handle callback from Whoop provider after user has authorized the application
+exports.callback = async (req, res, next) => {
   const { code, state } = req.query;
 
   //verify state parameter
   if (!state || state !== req.session.oauthState) {
-    return res.status(400).send("State parameter mismatch or missing");
+    const error = new Error("State parameter mismatch or missing");
+    error.status = 400;
+    return next(error);
   }
 
-  //is the auth code present in the query parameters of the request?
+  //check if the auth code is present in the query parameters of the request
   if (!code) {
-    res.status(400).send("Authorization code not provided.");
-    return;
+    const error = new Error("Authorization code not provided");
+    error.status = 400;
+    return next(error);
   }
+
   //send an HTTP POST request using Axios to the token URL of the auth server.
   try {
-    //axios.post is method used to make post request
     const response = await axios.post(
       TOKEN_URL,
       {
@@ -60,25 +64,23 @@ exports.callback = async (req, res) => {
         grant_type: "authorization_code",
       },
       {
+        //Whoop expects application/json
         headers: {
           "Content-Type": "application/json",
         },
       }
     );
-    //upon successful completion of request, the response from the auth server should
-    //include access token. Extract this token from response and send it back to client
-    const accessToken = response.data.access_token;
-    res.send(`Access token: ${accessToken}`);
 
+    const accessToken = response.data.access_token;
+    res.locals.access_token = accessToken;
+    return next();
+    
   } catch (error) {
-    //error handling
-    console.error(
-      "There's been an error with exchanging authorization code for access token:",
-      error.response ? error.response.data : error.message
+    const customError = new Error(
+      "Error exchanging authorization code for access token: " +
+        (error.response ? error.response.data : error.message)
     );
-    res
-      .status(500)
-      .send("Error exchanging authorization code for access token.");
-  };
-  
+    customError.status = 500;
+    return next(customError);
+  }
 };

@@ -1,8 +1,6 @@
 import { createApp } from 'vue';
-import App from './components/App.vue'; // Import the root component
+import App from '../client/components/App.vue';
+import router from '../client/router/router'; // Adjust the path to your router configuration
 
-// creating Vue application instance
-const app = createApp(App);
+createApp(App).use(router).mount('#app');
 
-// Mounting app to DOM
-app.mount('#app');
