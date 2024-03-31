@@ -6,7 +6,7 @@ const routes = [
     { path: '/', component: Welcome },
     { path: '/metrics', component: Metrics },
 ];
-
+ 
 const router = createRouter({
     //use default base URL for now
   history: createWebHistory(''),
