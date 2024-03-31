@@ -1,16 +1,20 @@
 <template>
     <div id="welcome-container">
       <h1>Welcome to Your Customized Whoop Metrics</h1>
-      <button @click="startOAuth">Login with WHOOP</button>
+      <button @click="startOAuth" aria-label="Login with Whoop">Login with WHOOP</button>
     </div>
   </template>
   
 <script>
-import {BACKEND_URL} from '../../server/config'
+import {BACKEND_URL} from '../../server/config';
 
   export default {
     methods: {
       startOAuth() {
+        if (!BACKEND_URL) {
+          console.log('BACKEND_URL is not defined');
+          return;
+        }
         // Redirect user to the backend route to initiate the OAuth flow
         window.location.href = `${BACKEND_URL}`;
       }
@@ -53,6 +57,6 @@ button:hover {
 
 h1 {
   font-family: 'Montserrat', sans-serif; 
-  margin-bottom: 20px; /* Space between h1 and button */
+  margin-bottom: 20px; 
 }
 </style>
