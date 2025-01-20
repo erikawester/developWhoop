@@ -1,59 +1,72 @@
-//create a path, a native NodeJS module to help in the joining of files
 const path = require("path");
-//access the html-webpack-plugin
-const HTMLWebpackPlugin = require("html-webpack-plugin");
+const { VueLoaderPlugin } = require('vue-loader');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-//tell webpack where to start bundling the files by specifying an entry point
+
 module.exports = {
-  entry: "./src/index.js",
-  //where the code gets bundled for use in the production environment
+  entry: "./client/main.js", 
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
   },
-  mode: process.env.NODE_ENV,
+  mode: 'development',
   stats: {
     children: true,
   },
-  //apply array of rules for each module
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
+      {
+        test: /\.js$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
           options: {
-            presets: ["@babel/preset-env", "@babel/preset-react"],
+            presets: ["@babel/preset-env", "@vue/babel-preset-app"], 
           },
-        },
-        //inserting this to try and make sure covered for js and jsx syntax
-        resolve: {
-          extensions: [".js", ".jsx"],
         },
       },
       {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"],
       },
+ 
     ],
   },
-  //helps when frontend and backend are separate during development
-  //paths starting with api will be forwarded to localhost:3000
-  devServer: {
-    port: 8080,
-    static: {
-      directory: path.resolve(__dirname),
-      publicPath: "/",
-    },
-    proxy: {
-      '/api': 'http://localhost:3000',
-    },
+  resolve: {
+    extensions: [".js", ".vue"],
+    fallback: {
+      "path": require.resolve("path-browserify"),
+      "os": require.resolve("os-browserify/browser"),
+      "crypto": require.resolve("crypto-browserify"),
+      "stream": require.resolve("stream-browserify"), 
+      "vm": require.resolve("vm-browserify")
+    }
   },
-  //plugin takes index.html and injects script tag into it. moves html file into the dist folder
   plugins: [
-    new HTMLWebpackPlugin({
-      template: path.join(__dirname, "src", "index.html"),
-    }),
+    new VueLoaderPlugin(), 
+    new HtmlWebpackPlugin({
+      template: './public/index.html'
+    })
   ],
+  devServer: {
+    historyApiFallback: true,
+    static: {
+      directory: path.join(__dirname, 'public'),
+    },
+    compress: true,
+    port: 8080,
+    proxy: [
+      {
+        context: ['/api'],
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        pathRewrite: { '^/api': '' },
+      },
+    ],
+  },
+
 };
